@@ -1,4 +1,7 @@
 var game;
+// Size of the board
+let gameSize = 5;
+
 var gameOptions = {
     tileSize: 200,
     colors: {
@@ -24,8 +27,8 @@ var gameOptions = {
 window.onload = function() {
     var gameConfig = {
        type: Phaser.WEBGL,
-       width: gameOptions.tileSize * 4,
-       height: gameOptions.tileSize * 4,
+       width: gameOptions.tileSize * gameSize,
+       height: gameOptions.tileSize * gameSize,
        backgroundColor: 0x333333,
        scene: [playGame]
    };
@@ -47,9 +50,74 @@ var playGame = new Phaser.Class({
         this.fieldArray = [];
         this.validator = []
         this.fieldGroup = this.add.group();
-        for(var i = 0; i < 4; i++){
+        this.setUpTiles()
+
+        this.initalizeGame()
+        this.setUpGameLogic()
+    },
+    initalizeGame: function(){
+        var emptyTiles = [];
+        for(var i = 0; i < gameSize; i++){
+            for(var j = 0; j < gameSize; j++){
+                if(this.fieldArray[i][j].tileValue == 0){
+                    emptyTiles.push({
+                        row: i,
+                        col: j
+                    })
+                }
+            }
+        }
+        for (var i = 1; i <= gameSize*gameSize; i++) {
+            this.validator.push(i)
+            var chosenTile = Phaser.Utils.Array.RemoveRandomElement(emptyTiles);
+            this.fieldArray[chosenTile.row][chosenTile.col].tileValue = i;
+            this.fieldArray[chosenTile.row][chosenTile.col].tileSprite.visible = true;
+            this.fieldArray[chosenTile.row][chosenTile.col].tileText.setText(i.toString());
+            this.fieldArray[chosenTile.row][chosenTile.col].tileText.visible = true;
+            this.tweens.add({
+                targets: [this.fieldArray[chosenTile.row][chosenTile.col].tileSprite, this.fieldArray[chosenTile.row][chosenTile.col].tileText],
+                alpha: 1,
+                duration: gameOptions.tweenSpeed,
+                onComplete: function(tween){
+                    tween.parent.scene.canMove = true;
+                },
+            });
+        }
+    },
+    resetTiles: function(){
+        for(var i = 0; i < gameSize; i++){
+            for(var j = 0; j < gameSize; j++){
+                this.fieldArray[i][j].canUpgrade = true;
+                this.fieldArray[i][j].tileSprite.x = j * gameOptions.tileSize + gameOptions.tileSize / 2;
+                this.fieldArray[i][j].tileSprite.y = i * gameOptions.tileSize + gameOptions.tileSize / 2;
+                this.fieldArray[i][j].tileText.x = j * gameOptions.tileSize + gameOptions.tileSize / 2;
+                this.fieldArray[i][j].tileText.y = i * gameOptions.tileSize + gameOptions.tileSize / 2;
+                if(this.fieldArray[i][j].tileValue > 0){
+                    this.fieldArray[i][j].tileSprite.alpha = 1;
+                    this.fieldArray[i][j].tileSprite.visible = true;
+                    this.fieldArray[i][j].tileText.alpha = 1;
+                    this.fieldArray[i][j].tileText.visible = true;
+                    this.fieldArray[i][j].tileText.setText(this.fieldArray[i][j].tileValue.toString());
+                }
+                else{
+                    this.fieldArray[i][j].tileValue = 0;
+                    this.fieldArray[i][j].tileSprite.alpha = 0;
+                    this.fieldArray[i][j].tileSprite.visible = false;
+                    this.fieldArray[i][j].tileText.alpha = 0;
+                    this.fieldArray[i][j].tileText.visible = false;
+                }
+                this.fieldArray[i][j].tileSprite.setTint(gameOptions.colors[this.fieldArray[i][j].tileValue]);
+            }
+        }
+    },
+    isInsideBoard: function(row, col){
+        return (row >= 0) && (col >= 0) && (row < gameSize) && (col < gameSize);
+    },
+    // This only occurs once game board reset should not run this method
+    setUpTiles: function() {
+        for(var i = 0; i < gameSize; i++){
             this.fieldArray[i] = [];
-            for(var j = 0; j < 4; j++){
+            for(var j = 0; j < gameSize; j++){
                 var two = this.add.sprite(j * gameOptions.tileSize + gameOptions.tileSize / 2, i * gameOptions.tileSize  + gameOptions.tileSize / 2, "tile");
                 two.alpha = 0;
                 two.visible = 0;
@@ -76,8 +144,8 @@ var playGame = new Phaser.Class({
                 }
             }
         }
-
-        this.initalizeGame();
+    },
+    setUpGameLogic: function() {
         this.input.on('gameobjectdown', function (p, go) { 
             tileVal = this.fieldArray[go.row][go.col].tileValue; 
             if (tileVal == this.validator[0]) {
@@ -86,68 +154,6 @@ var playGame = new Phaser.Class({
                 this.fieldArray[go.row][go.col].tileText.visible = 0
             }
         }, this)
-    },
-    initalizeGame: function(){
-        var emptyTiles = [];
-        for(var i = 0; i < 4; i++){
-            for(var j = 0; j < 4; j++){
-                if(this.fieldArray[i][j].tileValue == 0){
-                    emptyTiles.push({
-                        row: i,
-                        col: j
-                    })
-                }
-            }
-        }
-        for (var i = 1; i <= 16; i++) {
-            this.validator.push(i)
-            var chosenTile = Phaser.Utils.Array.RemoveRandomElement(emptyTiles);
-            this.fieldArray[chosenTile.row][chosenTile.col].tileValue = i;
-            this.fieldArray[chosenTile.row][chosenTile.col].tileSprite.visible = true;
-            this.fieldArray[chosenTile.row][chosenTile.col].tileText.setText(i.toString());
-            this.fieldArray[chosenTile.row][chosenTile.col].tileText.visible = true;
-            this.tweens.add({
-                targets: [this.fieldArray[chosenTile.row][chosenTile.col].tileSprite, this.fieldArray[chosenTile.row][chosenTile.col].tileText],
-                alpha: 1,
-                duration: gameOptions.tweenSpeed,
-                onComplete: function(tween){
-                    tween.parent.scene.canMove = true;
-                },
-            });
-        }
-	},
-    onTap: function(element) {
-        text = "onDown: " + element.tileValue;
-        sprite.tint = 0x00ff00;
-    },
-    resetTiles: function(){
-        for(var i = 0; i < 4; i++){
-            for(var j = 0; j < 4; j++){
-                this.fieldArray[i][j].canUpgrade = true;
-                this.fieldArray[i][j].tileSprite.x = j * gameOptions.tileSize + gameOptions.tileSize / 2;
-                this.fieldArray[i][j].tileSprite.y = i * gameOptions.tileSize + gameOptions.tileSize / 2;
-                this.fieldArray[i][j].tileText.x = j * gameOptions.tileSize + gameOptions.tileSize / 2;
-                this.fieldArray[i][j].tileText.y = i * gameOptions.tileSize + gameOptions.tileSize / 2;
-                if(this.fieldArray[i][j].tileValue > 0){
-                    this.fieldArray[i][j].tileSprite.alpha = 1;
-                    this.fieldArray[i][j].tileSprite.visible = true;
-                    this.fieldArray[i][j].tileText.alpha = 1;
-                    this.fieldArray[i][j].tileText.visible = true;
-                    this.fieldArray[i][j].tileText.setText(this.fieldArray[i][j].tileValue.toString());
-                }
-                else{
-                    this.fieldArray[i][j].tileValue = 0;
-                    this.fieldArray[i][j].tileSprite.alpha = 0;
-                    this.fieldArray[i][j].tileSprite.visible = false;
-                    this.fieldArray[i][j].tileText.alpha = 0;
-                    this.fieldArray[i][j].tileText.visible = false;
-                }
-                this.fieldArray[i][j].tileSprite.setTint(gameOptions.colors[this.fieldArray[i][j].tileValue]);
-            }
-        }
-    },
-    isInsideBoard: function(row, col){
-        return (row >= 0) && (col >= 0) && (row < 4) && (col < 4);
     }
 });
 function resize() {
