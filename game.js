@@ -29,7 +29,7 @@ window.onload = function() {
        type: Phaser.WEBGL,
        width: gameOptions.tileSize * gameSize,
        height: gameOptions.tileSize * gameSize,
-       backgroundColor: 0x333333,
+       backgroundColor: 0xdbdbdb,
        scene: [playGame]
    };
     game = new Phaser.Game(gameConfig);
@@ -44,7 +44,7 @@ var playGame = new Phaser.Class({
         Phaser.Scene.call(this, {key: "PlayGame"});
     },
     preload: function(){
-        this.load.image("tile", "tile.png");
+        this.load.image("tile", "assets/sprites/01/default.png");
     },
     create: function(){
         this.fieldArray = [];
@@ -128,7 +128,7 @@ var playGame = new Phaser.Class({
                 var text = this.add.text(j * gameOptions.tileSize + gameOptions.tileSize / 2, i * gameOptions.tileSize  + gameOptions.tileSize / 2, "2", {
                     font: "bold 64px Arial",
                     align: "center",
-                    color: "black",
+                    color: "#4c4c4c",
                     align: "center"
                 });
                 text.setOrigin(0.5);
