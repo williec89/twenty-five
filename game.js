@@ -1,3 +1,5 @@
+import { Tiles } from './tiles.js';
+
 var game;
 // Size of the board
 let gameSize = 5;
@@ -28,7 +30,7 @@ window.onload = function() {
     var gameConfig = {
        type: Phaser.WEBGL,
        width: gameOptions.tileSize * gameSize,
-       height: gameOptions.tileSize * gameSize,
+       height: gameOptions.tileSize * gameSize + 125,
        backgroundColor: 0x333333,
        scene: [playGame]
    };
@@ -41,24 +43,40 @@ var playGame = new Phaser.Class({
     Extends: Phaser.Scene,
     initialize:
     function playGame(){
-        Phaser.Scene.call(this, {key: "PlayGame"});
+        Phaser.Scene.call(this, {key: "PlayGame"})
     },
     preload: function(){
-        this.load.image("tile", "tile.png");
+        this.load.image("tile", "tile.png")
     },
     create: function(){
-        this.fieldArray = [];
+        let tiles = (new Tiles)
+        this.timedEvent = 0
+        this.gameSize = gameSize
+        this.displayTime = 0
+        this.fieldArray = []
         this.validator = []
         this.fieldGroup = this.add.group();
-        this.setUpTiles()
-
+        tiles.setUpTiles(this, gameOptions)
+        this.scoreText = this.add.text(16, game.config.height - 100, 'Score: '+ 0 , { fontSize: '64px', fill: '#fff', fontWeight: 'bold'  });
+        this.startTimer()
         this.initalizeGame()
         this.setUpGameLogic()
     },
+    startTimer: function(scoreText)
+    {
+        this.timedEvent = this.time.addEvent({ delay: 10, callback: this.updateTime, callbackScope: this});
+    },
+    updateTime: function()
+    {
+        this.displayTime += 1
+        this.timedEvent.reset({ delay: 10, callback: this.updateTime, callbackScope: this, repeat: 1});
+        this.scoreText.setText('Time: '+this.displayTime.toString()+"ms");
+        this.scoreText.setStyle({ fontSize: '64px', fill: '#fff', fontWeight: 'bold' });
+    },
     initalizeGame: function(){
         var emptyTiles = [];
-        for(var i = 0; i < gameSize; i++){
-            for(var j = 0; j < gameSize; j++){
+        for(var i = 0; i < this.gameSize; i++){
+            for(var j = 0; j < this.gameSize; j++){
                 if(this.fieldArray[i][j].tileValue == 0){
                     emptyTiles.push({
                         row: i,
@@ -67,7 +85,7 @@ var playGame = new Phaser.Class({
                 }
             }
         }
-        for (var i = 1; i <= gameSize*gameSize; i++) {
+        for (var i = 1; i <= this.gameSize*this.gameSize; i++) {
             this.validator.push(i)
             var chosenTile = Phaser.Utils.Array.RemoveRandomElement(emptyTiles);
             this.fieldArray[chosenTile.row][chosenTile.col].tileValue = i;
@@ -84,74 +102,25 @@ var playGame = new Phaser.Class({
             });
         }
     },
-    resetTiles: function(){
-        for(var i = 0; i < gameSize; i++){
-            for(var j = 0; j < gameSize; j++){
-                this.fieldArray[i][j].canUpgrade = true;
-                this.fieldArray[i][j].tileSprite.x = j * gameOptions.tileSize + gameOptions.tileSize / 2;
-                this.fieldArray[i][j].tileSprite.y = i * gameOptions.tileSize + gameOptions.tileSize / 2;
-                this.fieldArray[i][j].tileText.x = j * gameOptions.tileSize + gameOptions.tileSize / 2;
-                this.fieldArray[i][j].tileText.y = i * gameOptions.tileSize + gameOptions.tileSize / 2;
-                if(this.fieldArray[i][j].tileValue > 0){
-                    this.fieldArray[i][j].tileSprite.alpha = 1;
-                    this.fieldArray[i][j].tileSprite.visible = true;
-                    this.fieldArray[i][j].tileText.alpha = 1;
-                    this.fieldArray[i][j].tileText.visible = true;
-                    this.fieldArray[i][j].tileText.setText(this.fieldArray[i][j].tileValue.toString());
-                }
-                else{
-                    this.fieldArray[i][j].tileValue = 0;
-                    this.fieldArray[i][j].tileSprite.alpha = 0;
-                    this.fieldArray[i][j].tileSprite.visible = false;
-                    this.fieldArray[i][j].tileText.alpha = 0;
-                    this.fieldArray[i][j].tileText.visible = false;
-                }
-                this.fieldArray[i][j].tileSprite.setTint(gameOptions.colors[this.fieldArray[i][j].tileValue]);
-            }
-        }
-    },
     isInsideBoard: function(row, col){
-        return (row >= 0) && (col >= 0) && (row < gameSize) && (col < gameSize);
+        return (row >= 0) && (col >= 0) && (row < this.gameSize) && (col < this.gameSize);
     },
     // This only occurs once game board reset should not run this method
-    setUpTiles: function() {
-        for(var i = 0; i < gameSize; i++){
-            this.fieldArray[i] = [];
-            for(var j = 0; j < gameSize; j++){
-                var two = this.add.sprite(j * gameOptions.tileSize + gameOptions.tileSize / 2, i * gameOptions.tileSize  + gameOptions.tileSize / 2, "tile");
-                two.alpha = 0;
-                two.visible = 0;
-                two.row = i;
-                two.col = j;
-                two.setInteractive();
-                this.fieldGroup.add(two);
-                var text = this.add.text(j * gameOptions.tileSize + gameOptions.tileSize / 2, i * gameOptions.tileSize  + gameOptions.tileSize / 2, "2", {
-                    font: "bold 64px Arial",
-                    align: "center",
-                    color: "black",
-                    align: "center"
-                });
-                text.setOrigin(0.5);
-                text.alpha = 0;
-                text.visible = 0;
-                text.row = i;
-                text.column = j;
-                this.fieldGroup.add(text);
-                this.fieldArray[i][j] = {
-                    tileValue: 0,
-                    tileSprite: two,
-                    tileText: text,
-                }
-            }
-        }
-    },
+
     setUpGameLogic: function() {
         this.input.on('gameobjectdown', function (p, go) { 
-            tileVal = this.fieldArray[go.row][go.col].tileValue; 
+            let tileVal = this.fieldArray[go.row][go.col].tileValue; 
             if (tileVal == this.validator[0]) {
                 this.validator.shift()
                 this.fieldArray[go.row][go.col].tileSprite.visible = 0
                 this.fieldArray[go.row][go.col].tileText.visible = 0
+                this.scoreText.setStyle({ fontSize: '64px', fill: '#00ff00', fontWeight: 'bold' });
+                this.timedEvent.reset({ delay: 150, callback: this.updateTime, callbackScope: this, repeat: 0});
+            } else {
+                this.displayTime += 200
+                this.scoreText.setText('Time: '+this.displayTime.toString()+"ms");
+                this.scoreText.setStyle({ fontSize: '64px', fill: '#ff0000', fontWeight: 'bold' });
+                this.timedEvent.reset({ delay: 200, callback: this.updateTime, callbackScope: this, repeat: 0});
             }
         }, this)
     }
