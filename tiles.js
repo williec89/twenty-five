@@ -55,7 +55,6 @@ export class Tiles {
                     e.fieldArray[i][j].tileText.alpha = 0;
                     e.fieldArray[i][j].tileText.visible = false;
                 }
-                e.fieldArray[i][j].tileSprite.setTint(gameOptions.colors[e.fieldArray[i][j].tileValue]);
             }
         }
         return e

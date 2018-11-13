@@ -2,30 +2,12 @@ import { Tiles } from './tiles.js';
 
 var game;
 // Size of the board
-let gameSize = 3;
-
+let gameSize = 2;
 var gameOptions = {
     tileSize: 200,
-    colors: {
-        1: 0xFFFFFF,
-        2: 0xFFFFFF,
-        3: 0xFFEEEE,
-        4: 0xFFDDDD,
-        5: 0xFFCCCC,
-        6: 0xFFBBBB,
-        7: 0xFFAAAA,
-        8: 0xFF9999,
-        9: 0xFF8888,
-        10: 0xFF7777,
-        11: 0xFF6666,
-        12: 0xFF5555,
-        13: 0xFF4444,
-        14: 0xFF3333,
-        15: 0xFF2222,
-        16: 0xFF1111,
-    },
     tweenSpeed: 1500
 }
+
 window.onload = function() {
     var gameConfig = {
        type: Phaser.WEBGL,
@@ -39,6 +21,7 @@ window.onload = function() {
     resize();
     window.addEventListener("resize", resize, false);
 }
+
 var playGame = new Phaser.Class({
     Extends: Phaser.Scene,
     initialize:
@@ -48,19 +31,26 @@ var playGame = new Phaser.Class({
     preload: function(){
         this.load.image("tile", "tile.png")
     },
-    create: function(){
-        let tiles = (new Tiles)
+    init: function() {
         this.timedEvent = 0
         this.gameSize = gameSize
         this.displayTime = 0
         this.fieldArray = []
         this.validator = []
+    },
+    create: function(){
+        this.tiles = (new Tiles)
+        this.init()
         this.fieldGroup = this.add.group();
-        tiles.setUpTiles(this, gameOptions)
+        this.tiles.setUpTiles(this, gameOptions)
         this.scoreText = this.add.text(16, game.config.height - 100, 'Score: '+ 0 , { fontSize: '64px', fill: '#fff', fontWeight: 'bold'  });
         this.startTimer()
         this.initalizeGame()
         this.setUpGameLogic()
+    },
+    exit: function() {
+        // this.scoreText.remove();
+        this.game.state.restart()
     },
     startTimer: function(scoreText)
     {
@@ -102,13 +92,15 @@ var playGame = new Phaser.Class({
             });
         }
     },
-    isInsideBoard: function(row, col){
-        return (row >= 0) && (col >= 0) && (row < this.gameSize) && (col < this.gameSize);
-    },
     // This only occurs once game board reset should not run this method
 
     setUpGameLogic: function() {
-        this.input.on('gameobjectdown', function (p, go) { 
+        this.input.on('gameobjectdown', function (p, go) {
+            if (go.restart) {
+                this.exit()
+                this.create()
+                return
+            }
             let tileVal = this.fieldArray[go.row][go.col].tileValue;    
             if (tileVal == this.validator[0]) {
                 this.validator.shift()
@@ -125,7 +117,10 @@ var playGame = new Phaser.Class({
 
             if (this.validator.length == 0) {
                 // add functionality when game is finished
-                this.add.text(game.config.height/2 - 32*4, (game.config.height - 100)/2, "Game!" , { fontSize: '64px', fill: '#fff', fontWeight: 'bold'  });
+                this.add.text(game.config.height/2 - 33*4, (game.config.height - 100)/2, "Game!" , { fontSize: '64px', fill: '#fff', fontWeight: 'bold'  });
+                let playAgain = this.add.text(game.config.height/2 - 33*4, (game.config.height - 170)/2, "Play Again?" , { fontSize: '64px', fill: '#ddd', fontWeight: 'bold'  })
+                playAgain.restart = true
+                playAgain.setInteractive()
                 this.timedEvent.reset();
             }
         }, this)
