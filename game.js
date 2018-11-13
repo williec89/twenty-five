@@ -92,7 +92,6 @@ var playGame = new Phaser.Class({
             });
         }
     },
-    // This only occurs once game board reset should not run this method
 
     setUpGameLogic: function() {
         this.input.on('gameobjectdown', function (p, go) {
