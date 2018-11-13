@@ -2,7 +2,7 @@ import { Tiles } from './tiles.js';
 
 var game;
 // Size of the board
-let gameSize = 5;
+let gameSize = 3;
 
 var gameOptions = {
     tileSize: 200,
@@ -109,7 +109,7 @@ var playGame = new Phaser.Class({
 
     setUpGameLogic: function() {
         this.input.on('gameobjectdown', function (p, go) { 
-            let tileVal = this.fieldArray[go.row][go.col].tileValue; 
+            let tileVal = this.fieldArray[go.row][go.col].tileValue;    
             if (tileVal == this.validator[0]) {
                 this.validator.shift()
                 this.fieldArray[go.row][go.col].tileSprite.visible = 0
@@ -121,6 +121,12 @@ var playGame = new Phaser.Class({
                 this.scoreText.setText('Time: '+this.displayTime.toString()+"ms");
                 this.scoreText.setStyle({ fontSize: '64px', fill: '#ff0000', fontWeight: 'bold' });
                 this.timedEvent.reset({ delay: 200, callback: this.updateTime, callbackScope: this, repeat: 0});
+            }
+
+            if (this.validator.length == 0) {
+                // add functionality when game is finished
+                this.add.text(game.config.height/2 - 32*4, (game.config.height - 100)/2, "Game!" , { fontSize: '64px', fill: '#fff', fontWeight: 'bold'  });
+                this.timedEvent.reset();
             }
         }, this)
     }
