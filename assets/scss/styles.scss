@@ -1,0 +1,28 @@
+@import 'modules/normalize';
+@import 'modules/layout';
+
+body{
+    background: #dbdbdb;
+    padding: 0px;
+    margin: 0px;
+}
+
+#count,
+#score {
+    text-align: center;
+}
+#score {
+    font-size: 24px;
+	background: white;
+    border-radius: 50%;
+    height: 44px;
+    width: 44px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 5px;
+}
+#count {
+    font-size: 45px;
+    margin-bottom: 15px;
+}

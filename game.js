@@ -39,8 +39,7 @@ window.onload = function() {
 }
 var playGame = new Phaser.Class({
     Extends: Phaser.Scene,
-    initialize:
-    function playGame(){
+    initialize: function playGame(){
         Phaser.Scene.call(this, {key: "PlayGame"});
     },
     preload: function(){
@@ -85,30 +84,30 @@ var playGame = new Phaser.Class({
         }
     },
     resetTiles: function(){
-        for(var i = 0; i < gameSize; i++){
-            for(var j = 0; j < gameSize; j++){
-                this.fieldArray[i][j].canUpgrade = true;
-                this.fieldArray[i][j].tileSprite.x = j * gameOptions.tileSize + gameOptions.tileSize / 2;
-                this.fieldArray[i][j].tileSprite.y = i * gameOptions.tileSize + gameOptions.tileSize / 2;
-                this.fieldArray[i][j].tileText.x = j * gameOptions.tileSize + gameOptions.tileSize / 2;
-                this.fieldArray[i][j].tileText.y = i * gameOptions.tileSize + gameOptions.tileSize / 2;
-                if(this.fieldArray[i][j].tileValue > 0){
-                    this.fieldArray[i][j].tileSprite.alpha = 1;
-                    this.fieldArray[i][j].tileSprite.visible = true;
-                    this.fieldArray[i][j].tileText.alpha = 1;
-                    this.fieldArray[i][j].tileText.visible = true;
-                    this.fieldArray[i][j].tileText.setText(this.fieldArray[i][j].tileValue.toString());
-                }
-                else{
-                    this.fieldArray[i][j].tileValue = 0;
-                    this.fieldArray[i][j].tileSprite.alpha = 0;
-                    this.fieldArray[i][j].tileSprite.visible = false;
-                    this.fieldArray[i][j].tileText.alpha = 0;
-                    this.fieldArray[i][j].tileText.visible = false;
-                }
-                this.fieldArray[i][j].tileSprite.setTint(gameOptions.colors[this.fieldArray[i][j].tileValue]);
-            }
-        }
+        // for(var i = 0; i < gameSize; i++){
+        //     for(var j = 0; j < gameSize; j++){
+        //         this.fieldArray[i][j].canUpgrade = true;
+        //         this.fieldArray[i][j].tileSprite.x = j * gameOptions.tileSize + gameOptions.tileSize / 2;
+        //         this.fieldArray[i][j].tileSprite.y = i * gameOptions.tileSize + gameOptions.tileSize / 2;
+        //         this.fieldArray[i][j].tileText.x = j * gameOptions.tileSize + gameOptions.tileSize / 2;
+        //         this.fieldArray[i][j].tileText.y = i * gameOptions.tileSize + gameOptions.tileSize / 2;
+        //         if(this.fieldArray[i][j].tileValue > 0){
+        //             this.fieldArray[i][j].tileSprite.alpha = 1;
+        //             this.fieldArray[i][j].tileSprite.visible = true;
+        //             this.fieldArray[i][j].tileText.alpha = 1;
+        //             this.fieldArray[i][j].tileText.visible = true;
+        //             this.fieldArray[i][j].tileText.setText(this.fieldArray[i][j].tileValue.toString());
+        //         }
+        //         else{
+        //             this.fieldArray[i][j].tileValue = 0;
+        //             this.fieldArray[i][j].tileSprite.alpha = 0;
+        //             this.fieldArray[i][j].tileSprite.visible = false;
+        //             this.fieldArray[i][j].tileText.alpha = 0;
+        //             this.fieldArray[i][j].tileText.visible = false;
+        //         }
+        //         this.fieldArray[i][j].tileSprite.setTint(gameOptions.colors[this.fieldArray[i][j].tileValue]);
+        //     }
+        // }
     },
     isInsideBoard: function(row, col){
         return (row >= 0) && (col >= 0) && (row < gameSize) && (col < gameSize);
@@ -154,6 +153,9 @@ var playGame = new Phaser.Class({
                 this.fieldArray[go.row][go.col].tileText.visible = 0
             }
         }, this)
+    },
+    mapUI: function() {
+        
     }
 });
 function resize() {
